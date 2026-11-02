@@ -1,0 +1,11 @@
+{
+  "tenant_id": "northwind-outfitters",
+  "brand_name": "Northwind Outfitters",
+  "refund_window_days": 30,
+  "auto_refund_limit": 500.0,
+  "supported_languages": ["en", "es"],
+  "escalation_queue": "Tier 2 Support",
+  "escalation_sla": {"en": "4 business hours", "es": "4 horas hábiles"},
+  "max_verification_attempts": 3,
+  "today": "2026-11-02"
+}

@@ -1,0 +1,14 @@
+[
+  {"order_id": "A1001", "customer_id": "C001", "status": "shipped", "carrier": "UPS", "eta": "2026-11-05", "delivered_on": null, "final_sale": false, "refunded": false,
+   "items": [{"sku": "HEADSET-01", "name": "Wireless headset", "price": 89.00}]},
+  {"order_id": "A1002", "customer_id": "C001", "status": "delivered", "carrier": "UPS", "eta": null, "delivered_on": "2026-10-20", "final_sale": false, "refunded": false,
+   "items": [{"sku": "JACKET-07", "name": "Rain jacket", "price": 129.00}]},
+  {"order_id": "A1003", "customer_id": "C002", "status": "delivered", "carrier": "FedEx", "eta": null, "delivered_on": "2026-09-15", "final_sale": false, "refunded": false,
+   "items": [{"sku": "BOTTLE-02", "name": "Insulated bottle", "price": 34.00}, {"sku": "CAP-11", "name": "Trail cap", "price": 25.00}]},
+  {"order_id": "A1004", "customer_id": "C002", "status": "delivered", "carrier": "FedEx", "eta": null, "delivered_on": "2026-10-28", "final_sale": false, "refunded": false,
+   "items": [{"sku": "TENT-04", "name": "4-person tent", "price": 899.00}]},
+  {"order_id": "A1005", "customer_id": "C003", "status": "delivered", "carrier": "USPS", "eta": null, "delivered_on": "2026-10-25", "final_sale": true, "refunded": false,
+   "items": [{"sku": "SOCK-03", "name": "Clearance wool socks (3 pack)", "price": 45.00}]},
+  {"order_id": "A1006", "customer_id": "C003", "status": "processing", "carrier": "UPS", "eta": "2026-11-04", "delivered_on": null, "final_sale": false, "refunded": false,
+   "items": [{"sku": "BOOT-09", "name": "Hiking boots", "price": 240.00}]}
+]

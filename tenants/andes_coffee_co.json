@@ -1,0 +1,11 @@
+{
+  "tenant_id": "andes-coffee-co",
+  "brand_name": "Andes Coffee Co.",
+  "refund_window_days": 14,
+  "auto_refund_limit": 150.0,
+  "supported_languages": ["en", "es"],
+  "escalation_queue": "Customer Care",
+  "escalation_sla": {"en": "1 business day", "es": "1 día hábil"},
+  "max_verification_attempts": 2,
+  "today": "2026-11-02"
+}

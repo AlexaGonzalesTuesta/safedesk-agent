@@ -1,0 +1,5 @@
+[
+  {"customer_id": "C001", "name": "Ana Ruiz", "email": "ana.ruiz@example.com", "zip": "46201", "preferred_language": "es"},
+  {"customer_id": "C002", "name": "Marcus Lee", "email": "marcus.lee@example.com", "zip": "10001", "preferred_language": "en"},
+  {"customer_id": "C003", "name": "Priya Shah", "email": "priya.shah@example.com", "zip": "94105", "preferred_language": "en"}
+]
