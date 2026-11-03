@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import os
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
@@ -36,7 +37,7 @@ _boot()
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
-    session_id: str | None = None
+    session_id: Optional[str] = None
 
 
 @app.get("/")

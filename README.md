@@ -4,7 +4,7 @@ A bilingual (English and Spanish) customer-service agent that tracks orders, iss
 
 The question this project answers: **how do you let an AI agent take real actions on customer accounts without letting a scammer, a prompt injection, or a model mistake move money?**
 
-![tests](https://img.shields.io/badge/tests-23%20passing-brightgreen) ![evals](https://img.shields.io/badge/evals-34%2F34-brightgreen) ![unsafe actions](https://img.shields.io/badge/unsafe%20actions-0-brightgreen) ![python](https://img.shields.io/badge/python-3.10%2B-blue)
+![tests](https://img.shields.io/badge/tests-23%20passing-brightgreen) ![evals](https://img.shields.io/badge/evals-34%2F34-brightgreen) ![unsafe actions](https://img.shields.io/badge/unsafe%20actions-0-brightgreen) ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 
 ![SafeDesk web console: chat on the left, live trace of every tool call and guardrail decision on the right](docs/console.png)
 
@@ -64,7 +64,7 @@ Honest note: the rule-based planner was built alongside these cases, so its 100%
 
 ## Quickstart
 
-Requires Python 3.10 or newer.
+Requires Python 3.9 or newer.
 
 ```bash
 git clone https://github.com/<your-username>/safedesk-agent.git
