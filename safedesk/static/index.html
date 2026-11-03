@@ -61,12 +61,22 @@ button, input, textarea { font: inherit; color: inherit; }
 .conn.down i { background: var(--deny); }
 
 /* ---------- metrics strip ---------- */
-.strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border-bottom: 1px solid var(--line-strong); background: var(--rail); }
+.mission { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; border-bottom: 1px solid var(--line-strong); background: var(--rail); }
+.mission .pitch { padding: 12px 20px; min-width: 0; }
+.mission .pitch h1 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 700; }
+.mission .pitch p { margin: 2px 0 0; font-size: 13px; color: var(--ink-2); max-width: 92ch; }
+.mission .counters { display: flex; border-left: 1px solid var(--line-strong); }
+.mission .stat { padding: 10px 18px 8px; border-right: 1px solid var(--line); min-width: 128px; }
+.mission .stat:last-of-type { border-right: 1px solid var(--line-strong); }
+.mission .stat.good b { color: var(--primary); }
+.mission .reset { display: flex; align-items: center; padding: 0 16px; }
+.strip { display: none; }
 .stat { padding: 8px 14px 7px; border-right: 1px solid var(--line); min-width: 0; }
 .stat:last-child { border-right: 0; }
 .stat b { display: block; font: 600 20px/1.2 var(--mono); font-variant-numeric: tabular-nums; }
 .stat span { font: 11px var(--mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .stat.alert b { color: var(--deny); }
+.stat.attack b { color: var(--deny); }
 .stat.skeleton b { color: transparent; background: linear-gradient(90deg, var(--line) 0, var(--paper-2) 50%, var(--line) 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; width: 3ch; border-radius: 2px; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 
@@ -113,7 +123,7 @@ kbd { font: 500 10px var(--mono); border: 1px solid var(--line-strong); border-b
 
 /* case file */
 .casefile { background: var(--paper-2); }
-.case-meta { display: grid; grid-template-columns: repeat(5, auto) 1fr; gap: 0; border-bottom: 1px solid var(--line); font: 12px var(--mono); }
+.case-meta { display: grid; grid-template-columns: repeat(4, auto) 1fr; gap: 0; border-bottom: 1px solid var(--line); font: 12px var(--mono); }
 .case-meta div { padding: 8px 16px; border-right: 1px solid var(--line); white-space: nowrap; }
 .case-meta div:last-child { border-right: 0; text-align: right; }
 .case-meta label { color: var(--ink-3); text-transform: uppercase; font-size: 10px; letter-spacing: .08em; display: block; }
@@ -200,6 +210,8 @@ table.log td.why { color: var(--ink-2); word-break: break-word; }
 .banner.show { display: flex; justify-content: space-between; gap: 12px; }
 
 @media (max-width: 1180px) {
+  .mission { grid-template-columns: 1fr; }
+  .mission .counters { border-left: 0; border-top: 1px solid var(--line); }
   .desk { grid-template-columns: 230px minmax(0, 1fr); }
   .ledger { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line-strong); max-height: 45vh; }
   .strip { grid-template-columns: repeat(4, 1fr); }
@@ -218,13 +230,19 @@ table.log td.why { color: var(--ink-2); word-break: break-word; }
 <div class="app">
   <header class="topbar">
     <span class="brand">SafeDesk<small>Case Desk</small></span>
-    <span class="meta" id="tenant">tenant: loading</span>
+    <span class="meta" id="tenant">loading</span>
     <span class="spacer"></span>
+    <a class="linkbtn" href="https://github.com/AlexaGonzalesTuesta/safedesk-agent" target="_blank" rel="noopener">How it works (GitHub)</a>
     <span class="conn" id="conn"><i></i><span>connecting</span></span>
-    <button class="linkbtn" id="resetData" title="Reload seed orders and clear metrics">Reset demo data</button>
   </header>
 
-  <section class="strip" id="strip" aria-label="Live metrics"></section>
+  <section class="mission" aria-label="What to try">
+    <div class="pitch">
+      <h1>Try to talk this support agent into moving money it shouldn't.</h1>
+      <p>It can issue refunds and change account emails. Every action it attempts is checked by code before it runs, and each decision shows up in the ledger on the right. All data is fictional, and this sandbox is private to your browser.</p>
+    </div>
+    <div class="counters" id="strip" aria-label="Your sandbox results"></div>
+  </section>
 
   <div class="desk">
     <!-- Queue: scenarios a reviewer can replay -->
@@ -297,6 +315,16 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
+const SANDBOX = (() => {
+  const make = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+  try {
+    let id = localStorage.getItem("safedesk_sandbox");
+    if (!id) { id = make(); localStorage.setItem("safedesk_sandbox", id); }
+    return id;
+  } catch { return make(); }
+})();
+const api = (path, opts = {}) => fetch(path, { ...opts, headers: { ...(opts.headers || {}), "X-Sandbox-Id": SANDBOX } });
+
 const state = { sessionId: null, session: null, busy: false, calls: 0, turns: [], active: null, lastMessage: null, ran: new Set() };
 
 /* ---------- render: queue ---------- */
@@ -317,8 +345,8 @@ async function loadAccounts() {
   const box = $("accounts");
   box.innerHTML = `<div class="acct-intro dots">Loading test accounts</div>`;
   try {
-    const d = await (await fetch("/demo-data")).json();
-    box.innerHTML = `<div class="acct-intro">Fictional orders for tenant <b>${esc(d.tenant)}</b>. The demo date is ${esc(d.today)}. Each action starts a new case and fills the reply box. Press Enter to send.</div>` +
+    const d = await (await api("/demo-data")).json();
+    box.innerHTML = `<div class="acct-intro">Fictional orders. The demo runs as if today is ${esc(d.today)}. Each button starts a new case and fills the reply box; press Enter to send.</div>` +
       d.orders.map(o => `
       <div class="acct">
         <div class="acct-top"><span class="acct-id">${esc(o.order_id)}</span><span class="acct-amt">$${Number(o.amount).toFixed(2)} / ${esc(o.status)}</span></div>
@@ -348,21 +376,21 @@ function showTab(which) {
 
 /* ---------- render: metrics strip ---------- */
 const STATS = [
-  ["turns", "Turns"], ["turns_resolved_by_agent", "Resolved by agent"], ["escalations", "Handoffs"],
-  ["refund_dollars", "Refunded"], ["blocked_tool_calls", "Blocked calls", true], ["security_holds", "Security holds", true],
-  ["prompt_injections_caught", "Injections caught", true], ["avg_latency_ms", "Avg latency"]
+  ["attacks_stopped", "Attacks stopped", "attack"],
+  ["customers_helped", "Customers helped", "good"],
+  ["sent_to_human", "Sent to a human", ""],
 ];
 function renderStrip(m) {
-  $("strip").innerHTML = STATS.map(([k, label, alert]) => {
+  const cells = STATS.map(([k, label, cls]) => {
     if (!m) return `<div class="stat skeleton"><b>000</b><span>${label}</span></div>`;
-    let v = m[k] ?? 0;
-    if (k === "refund_dollars") v = "$" + Number(v).toFixed(0);
-    if (k === "avg_latency_ms") v = Number(v).toFixed(1) + "ms";
-    return `<div class="stat ${alert && m[k] > 0 ? "alert" : ""}"><b>${esc(v)}</b><span>${label}</span></div>`;
+    const v = m[k] ?? 0;
+    return `<div class="stat ${v > 0 ? cls : ""}"><b>${esc(v)}</b><span>${label}</span></div>`;
   }).join("");
+  $("strip").innerHTML = cells + `<div class="reset"><button class="linkbtn" id="resetData" type="button" title="Restore the original orders and clear your results">Reset my sandbox</button></div>`;
+  $("resetData").onclick = resetSandbox;
 }
 async function refreshMetrics() {
-  try { renderStrip(await (await fetch("/metrics")).json()); } catch { /* banner handles connectivity */ }
+  try { renderStrip(await (await api("/metrics")).json()); } catch { /* banner handles connectivity */ }
 }
 
 /* ---------- render: case header ---------- */
@@ -371,12 +399,11 @@ function renderCaseMeta() {
   const risk = s ? s.risk_level : "low";
   const riskCls = risk === "high" ? "v-high" : risk === "medium" ? "v-med" : "v-ok";
   $("caseMeta").innerHTML = `
-    <div><label>Session</label>${s ? esc(s.session_id) : "new"}</div>
     <div><label>Identity</label>${s && s.verified ? '<span class="v-ok">Verified</span>' : '<span class="v-no">Not verified</span>'}${s && s.failed_verifications ? ` (${s.failed_verifications} failed)` : ""}</div>
     <div><label>Language</label>${s ? esc(s.language.toUpperCase()) : "auto"}</div>
     <div><label>Risk</label><span class="${riskCls}">${esc(risk)}</span></div>
     <div><label>Waiting on</label>${s && s.pending_intent ? esc(s.pending_intent.replace("_", " ")) : "nothing"}</div>
-    <div><label>Turn</label>${s ? s.turn : 0}</div>`;
+    <div></div>`;
 }
 
 /* ---------- render: guardrail panel ---------- */
@@ -445,7 +472,7 @@ function ledgerAdd(data, turn) {
   $("ledgerEmpty").style.display = "none";
   $("log").style.display = "";
   const rows = [];
-  rows.push(`<tr class="turn-row" data-trace="${esc(data.trace_id)}"><td colspan="4">Turn ${turn} / intent ${esc(data.intent)} / ${esc(data.language)} / trace ${esc(data.trace_id)}</td></tr>`);
+  rows.push(`<tr class="turn-row" data-trace="${esc(data.trace_id)}"><td colspan="4">Message ${turn} / ${esc(data.intent.replaceAll("_", " "))} / ${esc(data.language.toUpperCase())}</td></tr>`);
   if (!data.tool_calls.length) {
     rows.push(`<tr class="call" data-trace="${esc(data.trace_id)}"><td class="n">--</td><td class="tool" colspan="3">No tool calls${data.guardrails.injection ? " (stopped at input guardrail)" : ""}</td></tr>`);
   }
@@ -523,7 +550,7 @@ async function send(text) {
   const pending = addEntry("agent", "Checking identity, risk, and policy", { cls: "pending", dots: true });
   ledgerSkeleton(true);
   try {
-    const resp = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, session_id: state.sessionId }) });
+    const resp = await api("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, session_id: state.sessionId }) });
     if (!resp.ok) throw new Error(resp.status === 422 ? "The agent rejected that message format." : `Agent returned HTTP ${resp.status}.`);
     const data = await resp.json();
     pending.remove();
@@ -580,10 +607,10 @@ $("newCase").onclick = newCase;
 $("tabCases").onclick = () => showTab("cases");
 $("tabAccts").onclick = () => showTab("accounts");
 $("retry").onclick = () => { hideBanner(); if (state.lastMessage) { const t = $("transcript").lastElementChild; if (t && t.classList.contains("customer")) t.remove(); send(state.lastMessage); } };
-$("resetData").onclick = async () => {
-  try { await fetch("/reset", { method: "POST" }); state.ran.clear(); newCase(); refreshMetrics(); if (!$("accounts").hidden) loadAccounts(); }
+async function resetSandbox() {
+  try { await api("/reset", { method: "POST" }); state.ran.clear(); newCase(); refreshMetrics(); if (!$("accounts").hidden) loadAccounts(); }
   catch { showBanner("Couldn't reset. Is the server running?"); }
-};
+}
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === "/") { e.preventDefault(); $("input").focus(); }
@@ -593,7 +620,7 @@ document.addEventListener("keydown", (e) => {
 
 renderStrip(null); renderQueue(); renderCaseMeta(); renderGuard(null); transcriptEmpty(); ledgerReset();
 fetch("/health").then(r => r.json()).then(h => {
-  $("tenant").textContent = `tenant ${h.tenant} / planner ${h.mode}`;
+  $("tenant").textContent = `${h.brand || h.tenant} support desk (demo)`;
   setConn(true, "agent online");
   refreshMetrics();
 }).catch(() => { setConn(false, "agent offline"); showBanner("Couldn't reach the agent. Start it with: uvicorn safedesk.api:app --reload"); });

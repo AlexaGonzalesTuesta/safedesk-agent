@@ -41,7 +41,7 @@ Expected: the agent asks for the missing details one at a time, then issues refu
 ```
 Quiero un reembolso del pedido A1002, mi correo es ana.ruiz@example.com
 ```
-Expected: the reply comes back in Spanish. If you already refunded A1002 in this server session, click **Reset demo data** first.
+Expected: the reply comes back in Spanish. If you already refunded A1002 in this sandbox, click **Reset my sandbox** first.
 
 ### 4. A refund the agent is not allowed to approve (handed to a human)
 ```
