@@ -1,0 +1,16 @@
+# One-click deploy on Render: Dashboard > New > Blueprint > pick this repo > Apply.
+services:
+  - type: web
+    name: safedesk-agent
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn safedesk.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: SAFEDESK_MODE
+        value: rules
+      - key: SAFEDESK_TRACE_DIR
+        value: /tmp/traces

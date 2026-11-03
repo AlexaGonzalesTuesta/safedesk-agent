@@ -37,7 +37,7 @@ class TenantConfig:
     @classmethod
     def load(cls, path: str | Path | None = None) -> "TenantConfig":
         chosen = path or os.environ.get("SAFEDESK_TENANT") or DEFAULT_TENANT_FILE
-        chosen = Path(chosen)
+        chosen = Path(str(chosen).strip())
         if not chosen.is_absolute() and not chosen.exists():
             chosen = TENANTS_DIR / chosen
         raw = json.loads(chosen.read_text(encoding="utf-8"))

@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from .agent import SupportAgent
 from .config import PACKAGE_DIR, TenantConfig
 from .session import Session
-from .store import Store
+from .store import Store, refund_eligibility
 from .tracing import Tracer
 
 app = FastAPI(title="SafeDesk Agent", version="0.1.0")
@@ -88,6 +88,37 @@ def metrics() -> dict:
         "cases_opened": len(store.cases),
         "email_changes": len(store.email_changes),
     }
+
+
+@app.get("/demo-data")
+def demo_data() -> dict:
+    """Fictional test accounts so reviewers can try every outcome. No real customer data."""
+    agent: SupportAgent = _state["agent"]
+    store, tenant = agent.store, agent.tenant
+    hints = {
+        "eligible": "Refund goes through automatically",
+        "not_delivered": "Not delivered yet, so refund is refused",
+        "outside_window": f"Outside the {tenant.refund_window_days}-day window, so refund is refused",
+        "final_sale": "Final sale, so refund is refused",
+        "already_refunded": "Already refunded",
+    }
+    orders = []
+    for order in store.orders.values():
+        customer = store.customers[order["customer_id"]]
+        elig = refund_eligibility(order, tenant)
+        hint = hints.get(elig["reason"], elig["reason"])
+        if elig["eligible"] and elig["requires_human"]:
+            hint = f"Above the ${tenant.auto_refund_limit:.0f} limit, so it goes to a human"
+        orders.append({
+            "order_id": order["order_id"],
+            "customer": customer["name"],
+            "email": customer["email"],
+            "status": "refunded" if order.get("refunded") else order["status"],
+            "items": ", ".join(i["name"] for i in order["items"]),
+            "amount": elig["amount"],
+            "refund_outcome": hint,
+        })
+    return {"tenant": tenant.tenant_id, "today": tenant.today.isoformat(), "orders": orders}
 
 
 @app.post("/reset")

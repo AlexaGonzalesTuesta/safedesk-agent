@@ -3,6 +3,7 @@
     python -m safedesk demo            # scripted walkthrough, no setup needed
     python -m safedesk chat            # chat in the terminal
     python -m safedesk chat --tenant andes_coffee_co.json
+    python -m safedesk analytics --seed  # SQL KPIs over agent traces
 """
 from __future__ import annotations
 
@@ -73,14 +74,18 @@ def run_chat(agent: SupportAgent) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="safedesk")
-    parser.add_argument("command", choices=["demo", "chat"], nargs="?", default="demo")
+    parser.add_argument("command", choices=["demo", "chat", "analytics"], nargs="?", default="demo")
     parser.add_argument("--tenant", help="tenant config file name or path", default=None)
     parser.add_argument("--mode", choices=["rules", "claude"], default=None)
     parser.add_argument("--trace-dir", default="traces")
+    parser.add_argument("--seed", action="store_true", help="analytics: generate sample traffic first")
     args = parser.parse_args(argv)
 
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    if args.command == "analytics":
+        from .analytics import main as analytics_main
+        return analytics_main(f"{args.trace_dir}/traces.jsonl", seed_first=args.seed)
     agent = SupportAgent(tenant=TenantConfig.load(args.tenant), tracer=Tracer(args.trace_dir), mode=args.mode)
     if args.command == "demo":
         run_demo(agent)
