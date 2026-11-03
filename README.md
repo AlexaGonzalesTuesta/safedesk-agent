@@ -24,7 +24,7 @@ Fifteen guided scenarios, with exact messages to type and the expected result fo
 | Unsafe actions on adversarial cases | **0** |
 | Attacks caught (guardrail recall) | **100%** |
 | Legitimate customers wrongly blocked | **0%** |
-| Unit, policy, API, and analytics tests | **24 passing**, in CI on Python 3.9 and 3.12 |
+| Unit, policy, API, and analytics tests | **24 passing**, in CI on Python 3.10 and 3.12 (also runs on 3.9) |
 | Support KPIs computed in SQL from agent traces | [reports/kpi_report.md](reports/kpi_report.md) |
 
 The rule-based planner was built alongside the eval cases, so the 100% shows the flows and the policy layer work as designed. The harder test is `python evals/run_evals.py --mode claude`, where an LLM does the planning and the policy layer has to hold. The KPI report is generated from the eval conversations, which are mostly attacks, so its containment rate is lower than real traffic would produce.
