@@ -6,7 +6,7 @@ The question this project answers: **how do you let an AI agent take real action
 
 ![tests](https://img.shields.io/badge/tests-23%20passing-brightgreen) ![evals](https://img.shields.io/badge/evals-34%2F34-brightgreen) ![unsafe actions](https://img.shields.io/badge/unsafe%20actions-0-brightgreen) ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 
-![SafeDesk web console: chat on the left, live trace of every tool call and guardrail decision on the right](docs/console.png)
+![SafeDesk Case Desk: scenario queue, case transcript, and a decision ledger showing every tool call with its policy verdict](docs/console.png)
 
 ## What it does
 
@@ -118,9 +118,18 @@ docker build -t safedesk .
 docker run -p 8000:8000 safedesk
 ```
 
-## Web console
+## Web console: the Case Desk
 
-The console at `/` shows the chat on the left and, for every turn, what the agent did and why on the right: intent, language, risk level and signals, each tool call marked allowed or blocked with the policy reason, and live metrics (refunds issued, escalations, blocked calls, injections caught).
+The console is designed for the people who would supervise this agent: support specialists and support-ops leads who already live in a case console all day. It reads like a case file plus an audit log, not a chat app.
+
+* **Queue (left):** eight replayable cases, from a routine order lookup to a Spanish voice-note scam. Press `1` to `8` to open one.
+* **Case file (center):** the transcript with speaker and time, plus a header showing identity status, language, risk level, and what the agent is waiting on. Security holds are marked with a red rule, handoffs with an ochre one.
+* **Decision ledger (right):** the session's risk signals as a checklist, then every tool call the agent attempted with an ALLOW or DENY verdict and the policy reason. Hover a transcript entry to highlight its rows in the ledger.
+* **Metrics strip (top):** turns, resolved by agent, handoffs, dollars refunded, blocked calls, security holds, injections caught, latency.
+
+Empty, loading, validation, and offline states are all handled: an empty case shows the test identities, a sending turn shows an inline loader and a skeleton ledger row, an empty or overlong message is flagged in the composer, and a dropped connection shows a banner with Retry.
+
+Type: Atkinson Hyperlegible (built for legibility during long reading shifts) and IBM Plex Mono for IDs, figures, and log lines. Palette: bone paper `#F4F1EA`, ledger green `#1F4D3A`, rail `#E9E3D6`, with red reserved for denials.
 
 API endpoints: `POST /chat`, `GET /sessions/{id}`, `GET /traces`, `GET /metrics`, `POST /reset`, `GET /health`.
 
