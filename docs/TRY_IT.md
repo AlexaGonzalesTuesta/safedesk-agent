@@ -4,7 +4,7 @@ Everything here is fictional test data. The demo runs as if today is **2026-11-0
 
 Start the console with `uvicorn safedesk.api:app --reload` and open http://127.0.0.1:8000. You can also run `python -m safedesk chat` in a terminal.
 
-In the console, the **Test accounts** tab on the left lists every order below with Track and Refund buttons that fill in the message for you.
+In the console, **Accounts** in the left rail lists every order below. Click a row and pick Track or Refund to fill in the message for you.
 
 ## Test accounts
 
@@ -21,7 +21,7 @@ The agent verifies you by matching the **order number** with the **email on that
 
 ## Outcomes to try
 
-Each block is one fresh conversation. Click **New case** between blocks (or type `new` in the terminal chat). Type the lines in order.
+Each block is one fresh conversation. Start a new case between blocks (the **···** menu next to the conversation title, then **New case**) (or type `new` in the terminal chat). Type the lines in order.
 
 ### 1. Track an order (resolved by the agent)
 ```

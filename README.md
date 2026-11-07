@@ -4,7 +4,7 @@
 
 ![tests](https://img.shields.io/badge/tests-26%20passing-brightgreen) ![evals](https://img.shields.io/badge/evals-34%2F34-brightgreen) ![unsafe actions](https://img.shields.io/badge/unsafe%20actions-0-brightgreen) ![python](https://img.shields.io/badge/python-3.9%2B-blue)
 
-![SafeDesk Case Desk demo: a refund from the test accounts, a "fraud team" gift card scam stopped, a slow-burn voice-note attack stopped, and a cross-account lookup denied](docs/demo.gif)
+![SafeDesk agent workspace demo: a refund from the test accounts, a "fraud team" gift card scam stopped, a slow-burn voice-note attack stopped, and a cross-account lookup denied](docs/demo.gif)
 
 ### [Try the live demo](https://safedesk-agent.onrender.com)
 
@@ -28,8 +28,8 @@ SafeDesk puts every rule in code that sits between the model and the account, th
 1. **Open the [live demo](https://safedesk-agent.onrender.com)** (or run it locally, below).
 2. **Press `4`.** A "fraud team" asks for a gift card refund. Four risk signals light up, no account tool is ever called, and a specialist gets a high priority case.
 3. **Press `5`.** The same trick split across two messages, with the correct email. Still blocked, because risk adds up over the session.
-4. **Open Test accounts** on the left and click **Refund** on order A1002. A real customer gets their $129 back in one message.
-5. **Read the Decision ledger** on the right. Every tool call shows ALLOW or DENY and the policy rule behind it.
+4. **Open Accounts** in the left rail, click order A1002 and pick **Ask for a refund**. A real customer gets their $129 back in one message.
+5. **Read the Decision ledger** in the customer panel on the right. Every tool call shows ALLOW or DENY and the policy rule behind it.
 
 Fifteen guided scenarios, with exact messages to type and the expected result for each, are in **[docs/TRY_IT.md](docs/TRY_IT.md)**.
 
@@ -109,7 +109,7 @@ pip install -r requirements-dev.txt
 
 | Command | What it does |
 |---|---|
-| `uvicorn safedesk.api:app --reload` | Case Desk console at http://127.0.0.1:8000 |
+| `uvicorn safedesk.api:app --reload` | Agent workspace at http://127.0.0.1:8000 |
 | `python -m safedesk demo` | Six scripted conversations in the terminal |
 | `python -m safedesk chat` | Chat with the agent in the terminal |
 | `python -m pytest -q` | 26 tests |
@@ -123,15 +123,15 @@ pip install -r requirements-dev.txt
 
 **About the public demo's safety:** it runs in rules mode with no API key, so there is nothing to leak and no usage bill. All customers, emails, and orders are fictional. Each browser gets its own sandbox (data, sessions, and results), so one visitor can't see or reset another's. Messages are capped at 2,000 characters and logs mask emails, card numbers, and phone numbers.
 
-## The Case Desk console
+## The agent workspace
 
-Built for the people who would supervise this agent: support specialists and support-ops leads who already spend their day in a case console. It reads like a case file plus an audit log, not a chat app. The top strip says what to try and keeps three numbers for your sandbox: attacks stopped, customers helped, and conversations sent to a human.
+Built for the people who would supervise this agent: support specialists and support-ops leads who already spend their day in a case console. It is laid out like Zendesk or Service Cloud, not a chat app. The top bar keeps three numbers for your sandbox: attacks stopped, customers helped, and conversations sent to a human.
 
-* **Cases and Test accounts** (left): eleven replayable cases (keys `1` to `0` open the first ten), and every fictional order with Track and Refund buttons.
-* **Case file** (center): the transcript with identity status, language, risk, and what the agent is waiting on.
-* **Decision ledger** (right): session risk signals as a checklist, then every tool call with its verdict and reason. Hover a transcript entry to highlight its rows.
+* **Inbox**: eleven replayable cases on the left (keys `1` to `0` open the first ten), the conversation in the center, and a customer panel on the right with identity, risk, signals, what the agent is waiting on, and the **Decision ledger**: every tool call with its ALLOW or DENY verdict and reason. Hover a message to highlight its ledger rows.
+* **Accounts**: every fictional order and what a refund request will do. Click a row to track it or ask for a refund as that customer.
+* **Insights**: attacks stopped, customers helped, refunds issued, blocked tool calls and why the policy engine said no, all from your sandbox's traces.
 
-Empty, loading, validation, and offline states are handled. Type is Atkinson Hyperlegible for long reading shifts and IBM Plex Mono for IDs and figures.
+Empty, loading, validation, and offline states are handled. Type is Figtree, with IBM Plex Mono for IDs, tool names and figures.
 
 API: `POST /chat`, `GET /demo-data`, `GET /traces`, `GET /metrics`, `GET /sessions/{id}`, `POST /reset`, `GET /health`.
 
